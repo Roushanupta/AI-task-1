@@ -1,0 +1,148 @@
+Breafly describing how ill code into that
+1. Pipeline Architecture
+
+a. User Query Input
+
+The system will take an initial query from the user and then pass it through a PlanAgent, which splits the query into sub-tasks.
+
+b. PlanAgent (Task Decomposition)
+
+The PlanAgent is responsible for analyzing the user query and breaking it down into discrete subtasks. These subtasks can be actions like calling specific APIs, performing computations, or retrieving information. Each sub-task will have metadata about the task’s objective and requirements.
+
+c. ToolAgent (Task Execution and Refinement)
+
+The ToolAgent will be responsible for executing the sub-tasks. If a task requires adjustment (e.g., because of failures or incomplete results), the ToolAgent can modify, delete, or add tasks as necessary.
+
+Feedback Loops and Reflection: After task execution, the system will evaluate the success of the operation. If errors or suboptimal outputs are detected, the process will loop back to refine the tasks or query. This ensures reliability.
+
+
+2. Reliability & Efficiency
+
+a. Error Handling
+
+Tasks will be monitored for success or failure. Error handling can be implemented by catching failed task executions and re-trying them with updated parameters or additional context.
+
+b. Feedback Loop
+
+The ToolAgent will have a reflection mechanism, where it checks if the output matches expectations. If the task is incomplete or incorrect, the system will loop back, adjust the task parameters, and re-execute.
+
+c. Task Iteration
+
+The sub-tasks created by the PlanAgent will go through a continuous refinement process. For example, tasks might initially be vague, and the ToolAgent would iteratively refine and adjust them before solving them.
+
+3. Langgraph Integration
+
+Langgraph is primarily used to manage the lifecycle of tasks and tools. Below is how Langgraph can fit into the architecture:
+
+Task and Tool Management: Langgraph allows the coordination between the PlanAgent and ToolAgent by managing task dependencies and execution flow.
+
+Execution Graph: Langgraph’s graph-based approach is suitable for representing task decomposition, refinement, and execution paths. Each task would be a node, and feedback loops can be handled via directed edges.
+
+Modularity: Langgraph enables modularization of the agents so that each one can be easily configured and reused for different types of queries.
+
+
+4. Code Quality
+
+a. Readability
+
+We will use clear, well-documented functions to ensure each step of the workflow is understandable. Code will be written using principles of object-oriented programming (OOP) where each agent (e.g., PlanAgent and ToolAgent) will be encapsulated within its own class.
+
+b. Modularity
+
+Each component (query processing, task decomposition, execution, error handling) will be modularized into separate functions or classes to ensure reusability.
+
+c. Documentation
+
+Inline documentation will explain the purpose of each function, class, and code block. A README will provide an overview of the architecture and the role of each component.
+
+
+---
+
+Pseudocode/Structure
+
+class PlanAgent:
+    def __init__(self, query):
+        self.query = query
+
+    def decompose(self):
+        # Analyze the query and split into sub-tasks
+        subtasks = self.analyze_query(self.query)
+        return subtasks
+
+    def analyze_query(self, query):
+        # Dummy task decomposition logic
+        return ["Subtask 1", "Subtask 2", "Subtask 3"]
+
+
+class ToolAgent:
+    def __init__(self):
+        self.feedback_loop_count = 0
+
+    def execute_task(self, task):
+        # Execute the task and return result
+        try:
+            result = self.perform_task(task)
+            return result
+        except Exception as e:
+            return None
+
+    def perform_task(self, task):
+        # Simulated task execution
+        if task == "Subtask 1":
+            return "Task 1 Success"
+        else:
+            raise Exception("Task Failed")
+
+    def refine_task(self, task):
+        # Modify task based on feedback
+        return task + " (refined)"
+
+    def feedback_loop(self, task, result):
+        # Check if the result is valid, and if not, refine task
+        if result is None or "Failed" in result:
+            refined_task = self.refine_task(task)
+            self.feedback_loop_count += 1
+            return self.execute_task(refined_task)
+        return result
+
+
+class AgenticWorkflow:
+    def __init__(self, query):
+        self.plan_agent = PlanAgent(query)
+        self.tool_agent = ToolAgent()
+
+    def run(self):
+        subtasks = self.plan_agent.decompose()
+        for task in subtasks:
+            result = self.tool_agent.execute_task(task)
+            refined_result = self.tool_agent.feedback_loop(task, result)
+            print(f"Task: {task}, Result: {refined_result}")
+
+
+# User Query
+user_query = "How can I optimize my database?"
+
+# Execute the Workflow
+workflow = AgenticWorkflow(user_query)
+workflow.run()
+
+Key Aspects of the Implementation
+
+PlanAgent: Decomposes the user query into subtasks.
+
+ToolAgent: Executes the subtasks and applies feedback loops to ensure task success.
+
+Feedback Loops: Handles refinement of tasks through iterative retries and modifications.
+
+
+Next Steps
+
+Implement actual task decomposition logic in the PlanAgent.
+
+Connect Langgraph to handle the management of tasks, execution flow, and reflection stages.
+
+Extend the feedback mechanism to cover broader error scenarios, such as failed API calls, and add proper logging.
+
+
+By implementing these steps, the workflow will be robust, reliable, and modular while adhering to the outlined criteria.
+
