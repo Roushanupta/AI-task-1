@@ -1,0 +1,65 @@
+class PlanAgent:
+    def __init__(self, query):
+        self.query = query
+
+    def decompose(self):
+        # Analyze the query and split into sub-tasks
+        subtasks = self.analyze_query(self.query)
+        return subtasks
+
+    def analyze_query(self, query):
+        # Dummy task decomposition logic
+        return ["Subtask 1", "Subtask 2", "Subtask 3"]
+
+
+class ToolAgent:
+    def __init__(self):
+        self.feedback_loop_count = 0
+
+    def execute_task(self, task):
+        # Execute the task and return result
+        try:
+            result = self.perform_task(task)
+            return result
+        except Exception as e:
+            return None
+
+    def perform_task(self, task):
+        # Simulated task execution
+        if task == "Subtask 1":
+            return "Task 1 Success"
+        else:
+            raise Exception("Task Failed")
+
+    def refine_task(self, task):
+        # Modify task based on feedback
+        return task + " (refined)"
+
+    def feedback_loop(self, task, result):
+        # Check if the result is valid, and if not, refine task
+        if result is None or "Failed" in result:
+            refined_task = self.refine_task(task)
+            self.feedback_loop_count += 1
+            return self.execute_task(refined_task)
+        return result
+
+
+class AgenticWorkflow:
+    def __init__(self, query):
+        self.plan_agent = PlanAgent(query)
+        self.tool_agent = ToolAgent()
+
+    def run(self):
+        subtasks = self.plan_agent.decompose()
+        for task in subtasks:
+            result = self.tool_agent.execute_task(task)
+            refined_result = self.tool_agent.feedback_loop(task, result)
+            print(f"Task: {task}, Result: {refined_result}")
+
+
+# User Query
+user_query = "How can I optimize my database?"
+
+# Execute the Workflow
+workflow = AgenticWorkflow(user_query)
+workflow.run()
